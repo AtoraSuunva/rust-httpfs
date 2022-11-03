@@ -1,0 +1,13 @@
+[package]
+name = "rust-http-server"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.0.17", features = ["derive", "help", "usage", "error-context", "wrap_help"] }
+http = "0.2.8"
+mime_guess = "2.0.4"
+owo-colors = { version = "3.5.0", features = ["supports-colors"] }
+tokio = { version = "1.21.2", features = ["full"] }
