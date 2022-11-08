@@ -135,6 +135,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "httpfs"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "http",
+ "mime_guess",
+ "owo-colors",
+ "tokio",
+]
+
+[[package]]
 name = "io-lifetimes"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -326,17 +337,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags",
-]
-
-[[package]]
-name = "rust-http-server"
-version = "0.1.0"
-dependencies = [
- "clap",
- "http",
- "mime_guess",
- "owo-colors",
- "tokio",
 ]
 
 [[package]]

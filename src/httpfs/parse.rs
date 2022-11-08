@@ -6,7 +6,7 @@ use tokio::{
     net::TcpStream,
 };
 
-use crate::{http_message::ByteRequest, http_parse_error::HttpParseError};
+use crate::{httpfs::message::ByteRequest, httpfs::parse_error::HttpParseError};
 
 pub async fn parse_request(stream: &mut TcpStream) -> Result<ByteRequest, HttpParseError> {
     let mut reader = BufReader::new(stream);
