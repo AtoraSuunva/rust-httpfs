@@ -8,7 +8,7 @@
 - [x] `GET /:path` -> Return file at path or 404
   - [x] Only files in data directory (`-d <PATH>` or default `.`)
   - [x] Prevent escape from data directory and accessing other files (`GET /../Cargo.toml`)
-- `POST /:path` -> Create file at path (`?overwrite=<bool>` option?)
+- [x] `POST /:path` -> Create file at path (`?overwrite=<bool>` option?)
 - Appropriate status codes & Human-readable error messages
 
   - 100 Continue (`Expect: 100-continue`?)

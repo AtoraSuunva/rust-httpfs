@@ -7,9 +7,11 @@ use crate::{
     cli::VERY_VERBOSE,
     filesystem::flatten_path,
     httpfs::get::handle_get,
+    httpfs::head::handle_head,
     httpfs::log::{log_request, log_request_response_short, log_response},
     httpfs::message::{ByteResponse, ResponseMessage, ResponseStyles},
     httpfs::parse::parse_request,
+    httpfs::post::handle_post,
     httpfs::server::UnrecoverableError,
 };
 
@@ -24,7 +26,7 @@ pub async fn handle_connection(
             let body = format!("Request parse error: {}", e);
             eprintln!("{}", body);
             let response: ByteResponse = Response::builder()
-                .status(404)
+                .status(400)
                 .header(header::CONTENT_LENGTH, body.len())
                 .header(header::CONTENT_TYPE, "text/plain")
                 .header(header::CONNECTION, "close")
@@ -51,7 +53,8 @@ pub async fn handle_connection(
 
     let response = match *request.method() {
         Method::GET => handle_get(&request, path).await?,
-        // TODO: support HEAD since it's required
+        Method::HEAD => handle_head(&request, path).await?,
+        Method::POST => handle_post(&request, path).await?,
         _ => handle_unknown(),
     };
 

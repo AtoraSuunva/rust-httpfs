@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use http::{header, Response};
 
@@ -10,7 +10,7 @@ use crate::{
 
 pub async fn handle_get(
     request: &ByteRequest,
-    path: PathBuf,
+    path: impl AsRef<Path>,
 ) -> Result<ByteResponse, UnrecoverableError> {
     let file = get_file(&path).await;
 
