@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use http::{header::HeaderName, HeaderValue, Request};
 use tokio::{
@@ -130,4 +130,15 @@ fn parse_header(header_line: &str) -> Result<(HeaderName, HeaderValue), HttpPars
         })?;
 
     Ok((key, value))
+}
+
+pub fn parse_query(query: &str) -> HashMap<String, String> {
+    let mut map = HashMap::new();
+    for pair in query.split('&') {
+        let mut pair = pair.split('=');
+        let key = pair.next().unwrap();
+        let value = pair.next().unwrap();
+        map.insert(key.to_string(), value.to_string());
+    }
+    map
 }

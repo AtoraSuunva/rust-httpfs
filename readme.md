@@ -15,15 +15,10 @@
   - 200 OK
   - 201 Created
   - 204 No Content (`DELETE`?)
-  - 304 Not Modified (`Cache-Control`?)
-  - 400 Bad Request (Too big? Trying to escape data directory?)
-  - 403 Forbidden (Trying to escape data directory?)
   - 404 Not Found
   - 405 Method Not Allowed (Not expected method, trying to `POST /`)
-  - 406 Not Acceptable (if we use `Accept`?)
   - 411 Length Required (missing `Content-Length`)
   - 413 Payload Too Large (`Content-Length` too large)
-  - 451 Unavailable For Legal Reasons (literally 1984)
   - 500 Internal Server Error (whoops)
   - 505 HTTP Version not supported (HTTP/1.0, 2, 3)
 
