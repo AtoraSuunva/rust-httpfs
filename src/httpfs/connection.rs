@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use http::{header, Method, Response};
+use http::{header, Method, Response, StatusCode};
 use tokio::{io::AsyncWriteExt, net::TcpStream};
 
 use crate::{
@@ -26,7 +26,7 @@ pub async fn handle_connection(
             let body = format!("Request parse error: {}", e);
             eprintln!("{}", body);
             let response: ByteResponse = Response::builder()
-                .status(400)
+                .status(StatusCode::from(e))
                 .header(header::CONTENT_LENGTH, body.len())
                 .header(header::CONTENT_TYPE, "text/plain")
                 .header(header::CONNECTION, "close")

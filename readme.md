@@ -11,10 +11,10 @@
 - [x] `POST /:path` -> Create file at path (`?overwrite=<bool>` option?)
 - Appropriate status codes & Human-readable error messages
 
-  - 100 Continue (`Expect: 100-continue`?)
   - 200 OK
   - 201 Created
   - 204 No Content (`DELETE`?)
+  - 400 Bad Request
   - 404 Not Found
   - 405 Method Not Allowed (Not expected method, trying to `POST /`)
   - 411 Length Required (missing `Content-Length`)

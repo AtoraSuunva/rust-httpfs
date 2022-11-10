@@ -1,4 +1,6 @@
-use std::string::FromUtf8Error;
+use std::{num::ParseIntError, string::FromUtf8Error};
+
+use http::StatusCode;
 
 #[derive(Debug, Clone)]
 pub enum HttpParseError {
@@ -7,6 +9,8 @@ pub enum HttpParseError {
     UnsupportedVersion(String),
     BodyNotAllowed,
     EndOfStream,
+    LengthRequired,
+    PayloadTooLarge,
 }
 
 impl std::fmt::Display for HttpParseError {
@@ -27,6 +31,12 @@ impl std::fmt::Display for HttpParseError {
             HttpParseError::EndOfStream => {
                 write!(f, "End of stream")
             }
+            HttpParseError::LengthRequired => {
+                write!(f, "Content-Length header required")
+            }
+            HttpParseError::PayloadTooLarge => {
+                write!(f, "Payload too large")
+            }
         }
     }
 }
@@ -43,8 +53,28 @@ impl From<FromUtf8Error> for HttpParseError {
     }
 }
 
+impl From<ParseIntError> for HttpParseError {
+    fn from(e: ParseIntError) -> Self {
+        HttpParseError::MalformedRequest(e.to_string())
+    }
+}
+
 impl From<http::Error> for HttpParseError {
     fn from(e: http::Error) -> Self {
         HttpParseError::MalformedRequest(e.to_string())
+    }
+}
+
+impl From<HttpParseError> for StatusCode {
+    fn from(e: HttpParseError) -> Self {
+        match e {
+            HttpParseError::MalformedRequest(_) => StatusCode::BAD_REQUEST,
+            HttpParseError::UnsupportedMethod(_) => StatusCode::NOT_IMPLEMENTED,
+            HttpParseError::UnsupportedVersion(_) => StatusCode::HTTP_VERSION_NOT_SUPPORTED,
+            HttpParseError::BodyNotAllowed => StatusCode::BAD_REQUEST,
+            HttpParseError::EndOfStream => StatusCode::BAD_REQUEST,
+            HttpParseError::LengthRequired => StatusCode::LENGTH_REQUIRED,
+            HttpParseError::PayloadTooLarge => StatusCode::PAYLOAD_TOO_LARGE,
+        }
     }
 }
