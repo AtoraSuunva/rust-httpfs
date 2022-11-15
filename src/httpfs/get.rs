@@ -27,7 +27,7 @@ async fn serve_directory(
 ) -> Result<ByteResponse, UnrecoverableError> {
     let mut entries = match get_directory(&path).await {
         Some(entries) => entries,
-        None => return create_404(path.as_ref().to_string_lossy().as_ref()),
+        None => return create_404(request.uri().path()),
     };
 
     let accept = request.headers().get(header::ACCEPT);
