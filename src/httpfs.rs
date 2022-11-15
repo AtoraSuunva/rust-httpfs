@@ -1,4 +1,5 @@
 pub mod connection;
+pub mod formatting;
 pub mod get;
 pub mod head;
 pub mod log;
