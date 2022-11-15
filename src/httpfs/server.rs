@@ -28,10 +28,7 @@ pub async fn run_server(
         let dir = directory.to_owned();
 
         tokio::spawn(async move {
-            if let Err(e) = handle_connection(stream, &dir, verbosity).await {
-                // TODO: send err to client
-                eprintln!("Error: {}", e);
-            };
+            handle_connection(stream, &dir, verbosity).await;
         });
     }
 }

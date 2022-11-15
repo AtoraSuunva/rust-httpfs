@@ -15,12 +15,38 @@ use crate::{
     httpfs::server::UnrecoverableError,
 };
 
-pub async fn handle_connection(
-    mut stream: TcpStream,
+pub async fn handle_connection(mut stream: TcpStream, directory: &str, verbosity: u8) {
+    let mut response: Option<ByteResponse> = None;
+
+    if let Err(e) = handle_request(&mut stream, directory, verbosity).await {
+        eprintln!("Error: {}", e);
+        let body: Vec<u8> = format!("Error: {}", e).into_bytes();
+        response = Some(
+            Response::builder()
+                .status(500)
+                .header(header::CONTENT_LENGTH, body.len())
+                .header(header::CONTENT_TYPE, "text/plain")
+                .header(header::CONNECTION, "close")
+                .body(Some(body))
+                .unwrap(),
+        );
+    };
+
+    // std::error::Error isn't Send so we can't just nest it in the above if
+    // and this is the best i could come up with right now so i'm sorry
+    if let Some(res) = response {
+        if let Err(e2) = write_response(&ResponseMessage::from(&res), &mut stream).await {
+            eprintln!("Error writing Error Response: {}", e2);
+        };
+    }
+}
+
+async fn handle_request(
+    stream: &mut TcpStream,
     directory: &str,
     verbosity: u8,
 ) -> Result<(), UnrecoverableError> {
-    let request = match parse_request(&mut stream).await {
+    let request = match parse_request(stream).await {
         Ok(request) => request,
         Err(e) => {
             let body = format!("Request parse error: {}", e);
@@ -34,7 +60,7 @@ pub async fn handle_connection(
                 .unwrap();
 
             let response = ResponseMessage::from(&response);
-            write_response(&response, &mut stream).await?;
+            write_response(&response, stream).await?;
             return Ok(());
         }
     };
@@ -66,7 +92,7 @@ pub async fn handle_connection(
         log_response(&http_message)?;
     }
 
-    write_response(&http_message, &mut stream).await?;
+    write_response(&http_message, stream).await?;
     Ok(())
 }
 
