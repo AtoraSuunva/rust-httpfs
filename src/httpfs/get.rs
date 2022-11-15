@@ -45,7 +45,13 @@ async fn serve_directory(
     entries.sort_unstable();
 
     let body: Vec<u8> = if use_html {
-        format_directory_html(&entries)
+        let parent = path
+            .as_ref()
+            .file_name()
+            .map(|f| f.to_string_lossy().to_string())
+            .unwrap_or_else(|| String::from("/"));
+
+        format_directory_html(&parent, &entries)
     } else {
         format_directory_plaintext(&entries)
     };
@@ -62,7 +68,7 @@ async fn serve_directory(
     Ok(response)
 }
 
-fn format_directory_html(entries: &[DirEntry]) -> Vec<u8> {
+fn format_directory_html(title: &str, entries: &[DirEntry]) -> Vec<u8> {
     let entries = entries
         .iter()
         .map(|e| e.html_format())
@@ -70,8 +76,9 @@ fn format_directory_html(entries: &[DirEntry]) -> Vec<u8> {
         .join("\n");
 
     format!(
-        "<!DOCTYPE html>\n<html>\n<head><meta charset=\"UTF-8\"></head><body>\n<ul>\n{}\n</ul>\n</body></html>",
-        entries
+        "<!DOCTYPE html>\n<html lang=\"en\">\n<head><title>{}</title><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"></head><body>\n<ul>\n{}\n</ul>\n</body></html>",
+        title,
+        entries,
     )
     .into()
 }
