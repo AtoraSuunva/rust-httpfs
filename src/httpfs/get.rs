@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 
 use http::{header, Response};
 
-use crate::filesystem::{get_directory, get_file, is_directory};
+use crate::filesystem::{get_directory, get_file, is_directory, DirEntry};
 
 use super::{
     message::{ByteRequest, ByteResponse},
@@ -22,7 +22,7 @@ pub async fn handle_get(
 }
 
 async fn serve_directory(
-    _request: &ByteRequest,
+    request: &ByteRequest,
     path: impl AsRef<Path>,
 ) -> Result<ByteResponse, UnrecoverableError> {
     let mut entries = match get_directory(&path).await {
@@ -30,23 +30,59 @@ async fn serve_directory(
         None => return create_404(path.as_ref().to_string_lossy().as_ref()),
     };
 
+    let accept = request.headers().get(header::ACCEPT);
+    let mut use_html = false;
+
+    if let Some(accept) = accept {
+        let accept = accept.to_str().unwrap_or_default();
+
+        // We should really do actual parsing but this is good enough
+        if accept.contains("text/html") {
+            use_html = true;
+        }
+    }
+
     entries.sort_unstable();
 
-    let body: Vec<u8> = entries
-        .iter()
-        .map(|e| e.plaintext_format())
-        .collect::<Vec<String>>()
-        .join("\n")
-        .into();
+    let body: Vec<u8> = if use_html {
+        format_directory_html(&entries)
+    } else {
+        format_directory_plaintext(&entries)
+    };
+
+    let content_type = if use_html { "text/html" } else { "text/plain" };
 
     let response: ByteResponse = Response::builder()
         .status(200)
         .header(header::CONTENT_LENGTH, body.len())
-        .header(header::CONTENT_TYPE, "text/plain")
+        .header(header::CONTENT_TYPE, content_type)
         .header(header::CONNECTION, "close")
         .body(Some(body))?;
 
     Ok(response)
+}
+
+fn format_directory_html(entries: &[DirEntry]) -> Vec<u8> {
+    let entries = entries
+        .iter()
+        .map(|e| e.html_format())
+        .collect::<Vec<String>>()
+        .join("\n");
+
+    format!(
+        "<!DOCTYPE html>\n<html>\n<head><meta charset=\"UTF-8\"></head><body>\n<ul>\n{}\n</ul>\n</body></html>",
+        entries
+    )
+    .into()
+}
+
+fn format_directory_plaintext(entries: &[DirEntry]) -> Vec<u8> {
+    entries
+        .iter()
+        .map(|e| e.plaintext_format())
+        .collect::<Vec<String>>()
+        .join("\n")
+        .into()
 }
 
 async fn serve_file(
