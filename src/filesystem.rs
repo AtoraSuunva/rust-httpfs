@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Component, Path, PathBuf};
 
 use mime_guess::Mime;
 use tokio::fs;
@@ -87,28 +87,24 @@ pub async fn is_directory(path: impl AsRef<Path>) -> bool {
 
 /// Resolve `.` and `..` in a path
 /// ```
-/// assert_eq!(flatten_path("/./test"), "/test");
-/// assert_eq!(flatten_path("/../test"), "/test");
-/// assert_eq!(flatten_path("/foo/./test"), "/foo/test");
-/// assert_eq!(flatten_path("/foo/../test"), "/test");
-/// assert_eq!(flatten_path("/foo/./../test"), "/test");
+/// assert_eq!(flatten_path(PathBuf::from("/./test")), PathBuf::from("/test")));
+/// assert_eq!(flatten_path(PathBuf::from("/../test")), PathBuf::from("/test"));
+/// assert_eq!(flatten_path(PathBuf::from("/foo/./test")), PathBuf::from("/foo/test"));
+/// assert_eq!(flatten_path(PathBuf::from("/foo/../test")), PathBuf::from("/test"));
+/// assert_eq!(flatten_path(PathBuf::from("/foo/./../test")), PathBuf::from("/test"));
 /// ```
-pub fn flatten_path(path: &str) -> String {
-    let path = path
-        .split('/')
-        .skip(1) // skip leading '/', it gives us an empty string that only gives us pain when we fold
-        .filter(|x| x != &".") // we can just ignore `.` since it doesn't change the path
-        .fold(vec![], |mut acc, x| {
-            if x == ".." {
+pub fn flatten_path(path: impl AsRef<Path>) -> PathBuf {
+    path.as_ref()
+        .components()
+        // we can just ignore `.` since it doesn't change the path
+        // and we ignore the root dir because we don't need it
+        .filter(|x| x != &Component::RootDir && x != &Component::CurDir)
+        .fold(PathBuf::new(), |mut acc, x| {
+            if x == Component::ParentDir {
                 acc.pop();
             } else {
                 acc.push(x);
             }
             acc
         })
-        .join("/");
-
-    // Add leading '/' back, this makes sure we always have it and that
-    // `assert_eq!(flatten_path("/.."), "/")` instead of `""`
-    format!("/{}", path)
 }

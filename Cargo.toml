@@ -11,3 +11,4 @@ http = "0.2.8"
 mime_guess = "2.0.4"
 owo-colors = { version = "3.5.0", features = ["supports-colors"] }
 tokio = { version = "1.21.2", features = ["full"] }
+urlencoding = "2.1.2"
