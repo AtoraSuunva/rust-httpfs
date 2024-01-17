@@ -1,10 +1,10 @@
 # rust-httpfs
 
-> A basic file server written in Rust
+> A basic file server written in Rust, with custom HTTP protocol code
 
 Why? It's a fun and interesting thing to build.
 
-Should you use it? Not for anything important.
+Should you use it? Not for anything important, the HTTP handling *should* be fairly solid, but it's nowhere near as tested as other solutions like [reqwest](https://docs.rs/reqwest/latest/reqwest/).
 
 ## Features
 
